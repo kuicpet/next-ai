@@ -11,12 +11,13 @@ cloudinary.config({
 export default async function createPost(req, res) {
   if (req.method === 'POST') {
     try {
+      await db.connect()
       const { name, prompt, photo } = req.body
-      const photoUrl = await cloudinary.uploader.upload(photo)
+      const photoUrl = await cloudinary?.uploader?.upload(photo)
       const newPost = await Post.create({
         name,
         prompt,
-        photo: photoUrl.url,
+        photo: photoUrl?.url,
       })
       res.status(201).json({ success: true, data: newPost })
     } catch (error) {
@@ -24,6 +25,8 @@ export default async function createPost(req, res) {
         success: false,
         message: error,
       })
+    } finally {
+      await db.disconnect()
     }
   } else {
     return res.status(405).json({ message: 'Method Not Allowed' })
